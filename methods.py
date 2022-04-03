@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+import matplotlib.colors as mcolors
 
 def solveBlackScholesNumerically1(M, N, L, T, K, sigma, r):
     u = np.zeros((N + 1, M + 1))
@@ -109,7 +110,6 @@ def findClosestX(x, L, N):
     return (x_floor, i_floor)
 
 def findNumericSolutionWithInterpolation(numericSolution, x, tau, L, T, M, N):
-    deltaTau = T/M
     deltaX = 2*L/N
 
     i = (x + L)/deltaX
@@ -126,4 +126,69 @@ def findNumericSolutionWithInterpolation(numericSolution, x, tau, L, T, M, N):
     result = ((x_ceil - x)*V[i_floor][j] - (x_floor - x)*V[i_ceil][j])/(x_ceil - x_floor)
     
     return result
-    
+
+def generateSamplesOfS(S):
+    listOfS = []
+    delta = 0.05
+    for i in range(1, 5):
+         value = (i - 5)*delta + S
+         listOfS.append(value)
+    listOfS.append(S)
+    for i in range(1,5):
+        value =  i*delta + S
+        listOfS.append(value)
+    return listOfS
+
+def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename):
+    solution = solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)
+    listOfProfits = [] # lista dos cenários de lucro/prejuízo no instante t
+    listOfPrices = [] # lista com os possíveis preços unitário de uma opção no instante t 
+    for S in listOfS:
+        x = findVarX(S, t, r, sigma, T, K)
+        tau = findVarTau(t, T)
+        i = findClosestX(x, L, N)[1]
+        j = findClosestTau(tau, T, M)[1]
+        v_ij = solution[1][i][j]
+        listOfPrices.append(v_ij)
+        profit = quantity*v_ij - prize
+        listOfProfits.append(profit)
+    plt.plot(listOfS, listOfProfits)
+    plt.xlabel('Cotação do ativo (R$) no instante ' + str(t) + ' ano')
+    plt.ylabel('Lucro (R$)')
+    plt.title("Análise de lucro/prejuízo do comprador")
+    plt.legend(str(quantity) + "opções de compra")
+    plt.savefig("graficos/"+filename+".png")
+    plt. clf()
+
+    table = np.zeros((len(listOfS), 3))
+    columns = ["Preço unitário do ativo (S)", "Valor unitário da opção (V)", "Lucro da operação" ]
+    table[:,0] = list(map(lambda S: round(S, 4), listOfS))
+    table[:,1] = list(map(lambda P: round(P, 4), listOfPrices))
+    table[:,2] = list(map(lambda P: round(P, 4), listOfProfits))
+    table = table.tolist()
+    for i in range(len(listOfS)):
+        for j in range(3):
+            table[i][j] = "R$ " + "{:.3f}".format(table[i][j]).replace('.', ',')
+    fig, ax =plt.subplots(1,1)
+    ax.axis('off')
+    ax.axis('tight')
+    ax.table(cellText= table,
+        colLabels=columns,
+        cellLoc = "left",
+        loc="center")
+    plt.savefig("tabelas/"+filename+".png")    
+    plt. clf()
+    return (listOfProfits, listOfPrices)
+
+def profitAndPriceAnalysisSpecificS(S, t, M, N, L, T, K, sigma, r, quantity, prize, filename):
+    solution = solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)
+    x = findVarX(S, t, r, sigma, T, K)
+    tau = findVarTau(t, T)
+    i = findClosestX(x, L, N)[1]
+    j = findClosestTau(tau, T, M)[1]
+    v_ij = solution[1][i][j]    
+    profit = quantity*v_ij - prize
+    print("Analise de lucro/prejuizo do comprador")
+    print("- Lucro no instante t: R$", profit)
+    print("- Valor da opcao no instante t: R$", v_ij)
+    return (profit, v_ij)

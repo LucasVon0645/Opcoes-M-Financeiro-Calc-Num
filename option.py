@@ -35,7 +35,7 @@ def main():
 
         print("\nSolucao da equacao de Black-Scholes")
         print("\nSolucao da equacao de Black-Scholes", file=external_file)
-        testSolutionWithoutVectorization = input("deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] :")
+        testSolutionWithoutVectorization = input("deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] : ")
         print("deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] : ", testSolutionWithoutVectorization, file=external_file)
 
         print("aguarde alguns segundos...")
@@ -49,7 +49,6 @@ def main():
         met.printTimeComparation(t01, tf1, tf2, external_file, testSolutionWithoutVectorization)
 
         print("\nResultados:")
-        print("\nResultados:", file=external_file)
 
         # Solução analítica para t = 0
         solutionAnalytical = met.solveBlackScholesAnalytically(S, K, sigma, r, T, 0)
@@ -84,8 +83,8 @@ def main():
             met.profitAndPriceAnalysisSpecificS(St, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
         else:
             listOfS = met.generateSamplesOfS(K)
-            met.profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
             print("Gerando tabelas e graficos...")
+            met.profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
             print("Tabela e grafico gerados para analise de lucros! Consulte as pastas 'tabelas' e 'graficos'")
             print("Tabela e grafico gerados para analise de lucros! Consulte as pastas 'tabelas' e 'graficos'", file=external_file)
 

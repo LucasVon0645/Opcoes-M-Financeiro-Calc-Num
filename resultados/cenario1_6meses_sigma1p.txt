@@ -8,15 +8,15 @@
 - t (tempo, em anos, no qual o valor da opcao eh calculado)? : 0.5
 - quantidade de opcoes? : 1000
 - S0 (preco do ativo em t = 0)? : 1.0
-- Voce deseja usar um valor conhecido de S em t (S_t)? [s/n] : n
+- Voce deseja usar um valor conhecido de S em t (S_t)? [s/n] : N
 
 parametro M calculado : 78
 
 Solucao da equacao de Black-Scholes
 deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] :  s
 
-tempo da solucao numerica com 2 loops :  2.245 s
-tempo da solucao com vetorizacao:  0.045 s
+tempo da solucao numerica com 2 loops :  2.287 s
+tempo da solucao com vetorizacao:  0.049 s
 
 Resultados:
 

@@ -29,7 +29,6 @@ def solveBlackScholesNumerically1(M, N, L, T, K, sigma, r):
             u[i][j] = u[i][j-1] + (deltaTau/(deltaX**2))*((sigma**2)/2)*(u[i-1][j-1] - 2*u[i][j-1] + u[i+1][j-1])
             v[i][j] = u[i][j]*np.exp(-r*tal_j)
 
-        x = K*np.exp(L + (sigma**2)*tal_j/2)
         u[N][j] = K*np.exp(L + (sigma**2)*tal_j/2)
         v[N][j] = u[N][j]*np.exp(-r*tal_j)
 
@@ -152,13 +151,22 @@ def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize,
         listOfPrices.append(v_ij)
         profit = quantity*v_ij - prize
         listOfProfits.append(profit)
-    plt.plot(listOfS, listOfProfits)
+
+    plt.plot(listOfS, listOfProfits, "")
     plt.xlabel('Cotação do ativo (R$) no instante ' + str(t) + ' ano')
     plt.ylabel('Lucro (R$)')
     plt.title("Análise de lucro/prejuízo do comprador")
-    plt.legend(str(quantity) + "opções de compra")
-    plt.grid()
-    plt.savefig("graficos/"+filename+".png")
+    plt.grid(True, linestyle='--')
+
+    textstr = '\n'.join((
+    r'$\mu=%.2f$' % (1, ),
+    r'$\mathrm{median}=%.2f$' % (1, ),
+    r'$\sigma=%.2f$' % (sigma, )))
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    plt.text(-5, 60, textstr, fontsize = 22, 
+         bbox = props)
+
+    plt.savefig("graficos/"+filename+".png") 
     plt. clf()
 
     table = np.zeros((len(listOfS), 3))

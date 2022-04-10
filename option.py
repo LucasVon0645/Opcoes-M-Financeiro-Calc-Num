@@ -4,7 +4,7 @@ import time
 
 def main():
 
-    print("*** Opcoes no mercado financeiro ***")
+    print("\n*** Opcoes no mercado financeiro ***")
     print("\n")
     print("Parametros")
     N = int(input("- N (o parametro de discretizacao no espaco)? : "))
@@ -19,75 +19,81 @@ def main():
     knownS = input("- Voce deseja usar um valor conhecido de S em t (S_t)? [s/n] : ")
     if (knownS == "s"):
         St = input("- Qual é o St (preco do ativo no tempo t)? : ")
-    filename = input("- nome base para arquivos de saida: ")
+    filename = input("- nome base para arquivos de saida (somente o nome, sem '.'): ")
+
+    with open("resultados/" + filename + ".txt", "w") as external_file:
+        if (knownS == "s"):
+            met.printFileIntroduction(external_file, N, L, sigma, K, T, r, t, quantity, S, knownS, St)
+        else:
+            met.printFileIntroduction(external_file, N, L, sigma, K, T, r, t, quantity, S, knownS)
+
+        M = int(3*met.findMmin(L, T, N, sigma))
+
+        print("\nparametro M calculado : ", str(M))
+        print("\nparametro M calculado : " + str(M), file=external_file)
 
 
-    M = int(3*met.findMmin(L, T, N, sigma))
+        print("\nSolucao da equacao de Black-Scholes")
+        print("\nSolucao da equacao de Black-Scholes", file=external_file)
+        testSolutionWithoutVectorization = input("deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] :")
+        print("deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] : ", testSolutionWithoutVectorization, file=external_file)
 
-    print("\nparametro M calculado : ", str(M))
+        print("aguarde alguns segundos...")
+        t01 = time.time()
+        if (testSolutionWithoutVectorization == "s"):
+            met.solveBlackScholesNumerically1(M, N, L, T, K, sigma, r)
+        tf1 = time.time()
+        solution = met.solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)
+        tf2 = time.time()
+        
+        met.printTimeComparation(t01, tf1, tf2, external_file, testSolutionWithoutVectorization)
 
-    print("\nSolucao da equacao de Black-Scholes")
-    print("aguarde alguns segundos...")
-    t01 = time.time()
-    met.solveBlackScholesNumerically1(M, N, L, T, K, sigma, r)
-    tf1 = time.time()
-    solution = met.solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)
-    tf2 = time.time()
-    print("\ntempo da solucao numerica com 2 loops : ","{:.3f}".format(tf1 - t01).replace('.', ',')+" s")
-    print("tempo da solucao com vetorizacao: ","{:.3f}".format(tf2 - tf1).replace('.', ',')+" s")
+        print("\nResultados:")
+        print("\nResultados:", file=external_file)
 
-    solutionAnalytical = met.solveBlackScholesAnalytically(S, K, sigma, r, T, 0)
-    u = solutionAnalytical[0]
-    v = solutionAnalytical[1]
+        # Solução analítica para t = 0
+        solutionAnalytical = met.solveBlackScholesAnalytically(S, K, sigma, r, T, 0)
+        u = solutionAnalytical[0]
+        v = solutionAnalytical[1]
+        met.printAnalyticalSolution(u, v, external_file)
 
-    print("\nSolucao analitica (para t = 0):")
-    print("u = ", u)
-    print("v (premio da opcao de compra) = ", v)
+        # solução númerica sem interpolação para t = 0
+        x = met.findVarX(S, 0, r, sigma, T, K)
+        tau = met.findVarTau(0, T)
+        i = met.findClosestX(x, L, N)[1]
+        j = met.findClosestTau(tau, T, M)[1]
+        u_ij = solution[0][i][j]
+        v_ij = solution[1][i][j]
+        met.printSimpleNumericSolution(i, j, u_ij, v_ij, u, v, external_file)
 
-    """ Aproximacao simples (sem interpolacao)"""
+        # solução númerica com interpolação para t = 0
+        v_interpolation = met.findNumericSolutionWithInterpolation(solution, x, tau, L, T, M, N)
+        met.printNumericSolutionWithInterpolation(v_interpolation, v, external_file)
 
-    x = met.findVarX(S, 0, r, sigma, T, K)
-    tau = met.findVarTau(0, T)
-    i = met.findClosestX(x, L, N)[1]
-    j = met.findClosestTau(tau, T, M)[1]
-    u_ij = solution[0][i][j]
-    v_ij = solution[1][i][j]
+        print("\nAnalise de lucro (para t = " + str(t) + " ano)")
+        print("- instante de tempo considerado (t): " + str(t) + " ano")
+        print("- quantidade: " + str(quantity) + " opcoes de compra")
+        print("- preco da opcao no momento da compra (V0): R$" + str(v))
+        prize = v*quantity
+        print("- premio total: R$" + str(prize) + " ( " + str(quantity) + " x " + "V0 )")
+        met.printFileIntroductionProfitAnalysis(t, quantity, v, prize, external_file)
 
-    print("\nSolucao numerica simples (para t = 0): ")
-    print("")
-    print("i = ", i)
-    print("j = ", j)
-    print("u_ij = ", u_ij)
-    print("v_ij (premio da opcao de compra) = R$", v_ij)
-    print("Diferencas em relacao a solucao analitica: ")
-    print("| delta u | = ", np.abs(u_ij - u))
-    print("| delta v | = ", np.abs(v_ij - v))
-    print("")
-
-    v_interpolation = met.findNumericSolutionWithInterpolation(solution, x, tau, L, T, M, N)
-    print("\nSolucao numerica com interpolacao (para t = 0): ")
-    print("")
-    print("v (premio da opcao de compra) = R$", v_interpolation)
-    print("Diferenca em relacao a solucao analitica: ")
-    print("| delta v | = ", np.abs(v_interpolation - v))
-
-    print("\nAnalise de lucro")
-    print("- instante de tempo considerado (t): " + str(t) + " ano")
-    print("- quantidade: " + str(quantity) + " opcoes de compra")
-    print("- preco da opcao no momento da compra (V0): R$" + str(v))
-    prize = v*quantity
-    print("- premio: R$" + str(prize) + " ( " + str(quantity) + " x " + "V0 )")
-    if (knownS == 's'):
-        print("- preco St do ativo: R$", St)
-        met.profitAndPriceAnalysisSpecificS(St, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
-    else:
-        listOfS = met.generateSamplesOfS(K)
-        met.profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
-        print("Tabela e grafico gerados")
-    print("")
+        if (knownS == 's'):
+            print("- preco St do ativo: R$", St)
+            print("- preco St do ativo: R$", St, file=external_file)
+            met.profitAndPriceAnalysisSpecificS(St, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
+        else:
+            listOfS = met.generateSamplesOfS(K)
+            met.profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
+            print("Gerando tabelas e graficos...")
+            print("Tabela e grafico gerados para analise de lucros! Consulte as pastas 'tabelas' e 'graficos'")
+            print("Tabela e grafico gerados para analise de lucros! Consulte as pastas 'tabelas' e 'graficos'", file=external_file)
 
 
-    print("*** fim ***")
+        print("\n*** fim ***")
+        print("\n*** fim ***", file=external_file)
+
+        external_file.close()
 
 fim = False
 while not fim :

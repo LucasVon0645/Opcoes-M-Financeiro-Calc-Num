@@ -157,6 +157,7 @@ def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize,
     plt.ylabel('Lucro (R$)')
     plt.title("Análise de lucro/prejuízo do comprador")
     plt.legend(str(quantity) + "opções de compra")
+    plt.grid()
     plt.savefig("graficos/"+filename+".png")
     plt. clf()
 
@@ -180,7 +181,7 @@ def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize,
     plt. clf()
     return (listOfProfits, listOfPrices)
 
-def profitAndPriceAnalysisSpecificS(S, t, M, N, L, T, K, sigma, r, quantity, prize, filename):
+def profitAndPriceAnalysisSpecificS(S, t, M, N, L, T, K, sigma, r, quantity, prize, external_file):
     solution = solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)
     x = findVarX(S, t, r, sigma, T, K)
     tau = findVarTau(t, T)
@@ -191,4 +192,87 @@ def profitAndPriceAnalysisSpecificS(S, t, M, N, L, T, K, sigma, r, quantity, pri
     print("Analise de lucro/prejuizo do comprador")
     print("- Lucro no instante t: R$", profit)
     print("- Valor da opcao no instante t: R$", v_ij)
+
+    print("Analise de lucro/prejuizo do comprador", file=external_file)
+    print("- Lucro no instante t: R$", profit, file=external_file)
+    print("- Valor da opcao no instante t: R$", v_ij, file=external_file)
     return (profit, v_ij)
+
+def printFileIntroduction(external_file, N, L, sigma, K, T, r, t, quantity, S, knownS, St = 0):
+    print("*** Opcoes no mercado financeiro ***", file=external_file)
+    print("\n")
+    print("Parametros")
+    print("- N (o parametro de discretizacao no espaco)? : " + str(N), file=external_file)
+    print("- L (o dominio da variavel x de espaco)? : " + str(L), file=external_file)
+    print("- sigma (volatilidade anualizada)? : " + str(sigma), file=external_file)
+    print("- K (preco de exercicio da opcao)? : " + str(K), file=external_file)
+    print("- T (periodo de vencimento da opcao)? : " + str(T), file=external_file)
+    print("- r (taxa de juros)? : " + str(r), file=external_file)
+    print("- t (tempo, em anos, no qual o valor da opcao eh calculado)? : " + str(t), file=external_file)
+    print("- quantidade de opcoes? : " + str(quantity), file=external_file)
+    print("- S0 (preco do ativo em t = 0)? : " + str(S), file=external_file)
+    print("- Voce deseja usar um valor conhecido de S em t (S_t)? [s/n] : " + str(knownS), file=external_file)
+    if (knownS == "s"):
+        print("- Qual é o St (preco do ativo no tempo t)? : " + str(St), file=external_file)
+
+def printTimeComparation(t01, tf1, tf2, external_file, testSolutionWithoutVectorization):
+    if (testSolutionWithoutVectorization == "s"):
+        print("\ntempo da solucao numerica com 2 loops : ","{:.3f}".format(tf1 - t01) + " s")
+    print("tempo da solucao com vetorizacao: ","{:.3f}".format(tf2 - tf1) + " s")
+
+    if (testSolutionWithoutVectorization == "s"):
+        print("\ntempo da solucao numerica com 2 loops : ","{:.3f}".format(tf1 - t01) + " s", file=external_file)
+    print("tempo da solucao com vetorizacao: ","{:.3f}".format(tf2 - tf1) + " s", file=external_file)
+
+def printAnalyticalSolution(u, v, external_file):
+    print("\nSolucao analitica (para t = 0):")
+    print("u = ", u)
+    print("Preco da opcao de compra de 1 unidade: v = R$", v)
+
+    print("\nResultados:", file=external_file)
+    print("\nSolucao analitica (para t = 0):", file=external_file)
+    print("u = " +str(u), file=external_file)
+    print("Preco da opcao de compra de 1 unidade: v = R$"+str(v), file=external_file)
+
+def printSimpleNumericSolution(i, j, u_ij, v_ij, u, v, external_file):
+    print("\nSolucao numerica sem interpolacao (para t = 0): ")
+    print("")
+    print("i = ", i)
+    print("j = ", j)
+    print("u_ij = ", u_ij)
+    print("preco da opcao de compra de 1 unidade: v = R$", v_ij)
+    print("Diferencas em relacao a solucao analitica: ")
+    print("| delta u | = ", np.abs(u_ij - u))
+    print("| delta v | = ", np.abs(v_ij - v))
+    print("")
+
+    print("\nSolucao numerica sem interpolacao (para t = 0): ", file=external_file)
+    print("", file=external_file)
+    print("i = ", i, file=external_file)
+    print("j = ", j, file=external_file)
+    print("u_ij = ", u_ij, file=external_file)
+    print("preco da opcao de compra de 1 unidade: v = R$", v_ij, file=external_file)
+    print("Diferencas em relacao a solucao analitica: ", file=external_file)
+    print("| delta u | = ", np.abs(u_ij - u), file=external_file)
+    print("| delta v | = ", np.abs(v_ij - v), file=external_file)
+    print("", file=external_file)
+
+def printNumericSolutionWithInterpolation(v_interpolation, v, external_file):
+    print("\nSolucao numerica com interpolacao (para t = 0): ")
+    print("")
+    print("preco da opcao de compra de 1 unidade: v = R$", v_interpolation)
+    print("Diferenca em relacao a solucao analitica: ")
+    print("| delta v | = ", np.abs(v_interpolation - v))
+
+    print("\nSolucao numerica com interpolacao (para t = 0): ", file=external_file)
+    print("", file=external_file)
+    print("preco da opcao de compra de 1 unidade: v = R$", v_interpolation, file=external_file)
+    print("Diferenca em relacao a solucao analitica: ", file=external_file)
+    print("| delta v | = ", np.abs(v_interpolation - v), file=external_file)
+
+def printFileIntroductionProfitAnalysis(t, quantity, v, prize, external_file):
+    print("\nAnalise de lucro (para t =" + str(t) + " ano)", file=external_file)
+    print("- instante de tempo considerado (t): " + str(t) + " ano", file=external_file)
+    print("- quantidade: " + str(quantity) + " opcoes de compra", file=external_file)
+    print("- preco da opcao no momento da compra (V0): R$" + str(v), file=external_file)
+    print("- premio total: R$" + str(prize) + " ( " + str(quantity) + " x " + "V0 )", file=external_file)

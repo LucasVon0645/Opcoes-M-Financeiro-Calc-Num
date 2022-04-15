@@ -14,7 +14,7 @@ parametro M calculado : 5370
 
 Solucao da equacao de Black-Scholes
 deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] :  n
-tempo da solucao com vetorizacao:  3.812 s
+tempo da solucao com vetorizacao:  3.753 s
 
 Resultados:
 

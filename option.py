@@ -84,10 +84,13 @@ def main():
         else:
             listOfS = met.generateSamplesOfS(K)
             print("Gerando tabelas e graficos...")
-            met.profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
+            met.generateProfitAndPriceAnalysisGraphics( solution, listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
             print("Tabela e grafico gerados para analise de lucros! Consulte as pastas 'tabelas' e 'graficos'")
             print("Tabela e grafico gerados para analise de lucros! Consulte as pastas 'tabelas' e 'graficos'", file=external_file)
-
+            print("")
+            priceForDifferentTimes = input("- Voce deseja analisar graficamente o valor dessa opcao para diferentes instantes? [s/n] : ")
+            if (priceForDifferentTimes == "s"):
+                met.generateGraphicOfOptionPriceOverDiferentTimes(solution, listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename)
 
         print("\n*** fim ***")
         print("\n*** fim ***", file=external_file)

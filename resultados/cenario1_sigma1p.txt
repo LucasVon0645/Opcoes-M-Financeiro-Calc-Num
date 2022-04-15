@@ -5,7 +5,7 @@
 - K (preco de exercicio da opcao)? : 1.0
 - T (periodo de vencimento da opcao)? : 1.0
 - r (taxa de juros)? : 0.01
-- t (tempo, em anos, no qual o valor da opcao eh calculado)? : 1.0
+- t (tempo, em anos, no qual o valor da opcao eh calculado)? : 0.5
 - quantidade de opcoes? : 1000
 - S0 (preco do ativo em t = 0)? : 1.0
 - Voce deseja usar um valor conhecido de S em t (S_t)? [s/n] : n
@@ -15,8 +15,8 @@ parametro M calculado : 78
 Solucao da equacao de Black-Scholes
 deseja comparar os tempos das solucoes com e sem vetorizacao? (isso pode demorar mais) [s/n] :  s
 
-tempo da solucao numerica com 2 loops :  2.315 s
-tempo da solucao com vetorizacao:  0.044 s
+tempo da solucao numerica com 2 loops :  2.289 s
+tempo da solucao com vetorizacao:  0.037 s
 
 Resultados:
 
@@ -41,8 +41,8 @@ preco da opcao de compra de 1 unidade: v = R$ 0.010772427731644895
 Diferenca em relacao a solucao analitica: 
 | delta v | =  6.731270997029776e-06
 
-Analise de lucro (para t =1.0 ano)
-- instante de tempo considerado (t): 1.0 ano
+Analise de lucro (para t =0.5 ano)
+- instante de tempo considerado (t): 0.5 ano
 - quantidade: 1000 opcoes de compra
 - preco da opcao no momento da compra (V0): R$0.010779159002641925
 - premio total: R$10.779159002641926 ( 1000 x V0 )

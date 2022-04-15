@@ -121,9 +121,10 @@ def findNumericSolutionWithInterpolation(numericSolution, x, tau, L, T, M, N):
     j = tauValues[1]
 
     V = numericSolution[1]
-
-    result = ((x_ceil - x)*V[i_floor][j] - (x_floor - x)*V[i_ceil][j])/(x_ceil - x_floor)
-    
+    if (i_ceil != i_floor):
+        result = ((x_ceil - x)*V[i_floor][j] - (x_floor - x)*V[i_ceil][j])/(x_ceil - x_floor)
+    else:
+        result = V[i_ceil][j]
     return result
 
 def generateSamplesOfS(S):
@@ -138,20 +139,30 @@ def generateSamplesOfS(S):
         listOfS.append(value)
     return listOfS
 
-def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename):
-    solution = solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)
+def generateSampleOfTimes(t, T):
+    listOfTimes = []
+    listOfTimes.append(0.0)
+    listOfTimes.append(t/2)
+    listOfTimes.append((T - t)/2 + t)
+    listOfTimes.append(T)
+    return listOfTimes
+
+def profitAndPriceAnalysis(blackScholesSolution, listOfS, t, M, N, L, T, K, sigma, r, quantity, prize):
     listOfProfits = [] # lista dos cenários de lucro/prejuízo no instante t
     listOfPrices = [] # lista com os possíveis preços unitário de uma opção no instante t 
     for S in listOfS:
         x = findVarX(S, t, r, sigma, T, K)
         tau = findVarTau(t, T)
-        i = findClosestX(x, L, N)[1]
-        j = findClosestTau(tau, T, M)[1]
-        v_ij = solution[1][i][j]
-        listOfPrices.append(v_ij)
-        profit = quantity*v_ij - prize
+        v = findNumericSolutionWithInterpolation(blackScholesSolution, x, tau, L, T, M, N)
+        listOfPrices.append(v)
+        profit = quantity*v - prize
         listOfProfits.append(profit)
+    return (listOfPrices, listOfProfits)
 
+def generateProfitAndPriceAnalysisGraphics( blackScholesSolution, listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename):
+    analysis = profitAndPriceAnalysis(blackScholesSolution, listOfS, t, M, N, L, T, K, sigma, r, quantity, prize)
+    listOfPrices = analysis[0]
+    listOfProfits = analysis[1]
     plt.plot(listOfS, listOfProfits, "")
     plt.xlabel('Cotação do ativo (R$) no instante ' + str(t) + ' ano')
     plt.ylabel('Lucro (R$)')
@@ -166,8 +177,8 @@ def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize,
     plt.text(-5, 60, textstr, fontsize = 22, 
          bbox = props)
 
-    plt.savefig("graficos/"+filename+".png") 
-    plt. clf()
+    plt.savefig("graficos/lucro/"+filename+".png") 
+    plt.clf()
 
     table = np.zeros((len(listOfS), 3))
     columns = ["Preço unitário do ativo (S)", "Valor unitário da opção (V)", "Lucro da operação" ]
@@ -188,6 +199,24 @@ def profitAndPriceAnalysis(listOfS, t, M, N, L, T, K, sigma, r, quantity, prize,
     plt.savefig("tabelas/"+filename+".png")    
     plt. clf()
     return (listOfProfits, listOfPrices)
+
+def generateGraphicOfOptionPriceOverDiferentTimes(blackScholesSolution, listOfS, t, M, N, L, T, K, sigma, r, quantity, prize, filename):
+    listOfTimes = generateSampleOfTimes(t, T)
+    plt.xlabel('Preço do ativo (R$)')
+    plt.ylabel('Preço da opção de compra (R$)')
+    plt.title("Análise do preço da opção de compra para diferentes instantes")
+    plt.grid(True, linestyle='--')
+    for instant in listOfTimes:
+        analysis = profitAndPriceAnalysis(blackScholesSolution, listOfS, instant, M, N, L, T, K, sigma, r, quantity, prize)
+        listOfPrices = analysis[0]
+        label = "Instante t = " + "{:.2f}".format(instant).replace('.', ',') + " ano"
+        print(label)
+        plt.plot(listOfS, listOfPrices, label=label)
+    plt.legend()
+    plt.savefig("graficos/preco/"+filename+".png") 
+    plt.clf()
+
+
 
 def profitAndPriceAnalysisSpecificS(S, t, M, N, L, T, K, sigma, r, quantity, prize, external_file):
     solution = solveBlackScholesNumerically2(M, N, L, T, K, sigma, r)

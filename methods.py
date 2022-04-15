@@ -143,6 +143,7 @@ def generateSampleOfTimes(t, T):
     listOfTimes = []
     listOfTimes.append(0.0)
     listOfTimes.append(t/2)
+    listOfTimes.append(t)
     listOfTimes.append((T - t)/2 + t)
     listOfTimes.append(T)
     return listOfTimes
